@@ -21,6 +21,12 @@ def update_version(new_version):
     commit_message = f"chore: bump version to {new_version}"
     subprocess.run(['git', 'commit', '-am', commit_message])
 
+    # Tag the commit with the new version
+    subprocess.run(['git', 'tag', new_version])
+
+    # Push the commit and tag to origin
+    subprocess.run(['git', 'push', 'origin', new_version])
+
 def update_descriptor_mod_version(file_path, new_version):
     # Read current content from descriptor.mod
     with open(file_path, 'r') as f:
