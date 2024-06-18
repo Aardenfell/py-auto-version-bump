@@ -12,6 +12,11 @@ def get_current_version():
         package_json_path = './package.json'  # Update with your actual file path
         current_version = read_package_json_version(package_json_path)
 
+    if not current_version:
+        # If package.json does not contain version, read from __init__.py
+        init_py_path = './__init__.py'  # Update with your actual file path
+        current_version = read_init_py_version(init_py_path)
+
     return current_version
 
 def read_descriptor_mod_version(file_path):
@@ -33,6 +38,19 @@ def read_package_json_version(file_path):
         with open(file_path, 'r') as f:
             data = json.load(f)
             return data.get('version')
+    except FileNotFoundError:
+        pass  # Handle file not found error
+
+    return None
+
+def read_init_py_version(file_path):
+    try:
+        # Read version from __init__.py
+        with open(file_path, 'r') as f:
+            content = f.read()
+            match = re.search(r'__version__\s*=\s*[\'"]([\d.]+)[\'"]', content)
+            if match:
+                return match.group(1)
     except FileNotFoundError:
         pass  # Handle file not found error
 
@@ -65,6 +83,22 @@ def update_package_json_version(file_path, new_version):
     except FileNotFoundError:
         pass  # Handle file not found error
 
+def update_init_py_version(file_path, new_version):
+    try:
+        # Update version in __init__.py
+        with open(file_path, 'r') as f:
+            content = f.read()
+        
+        # Update version in __init__.py
+        updated_content = re.sub(r'(__version__\s*=\s*[\'"])[\d.]+([\'"])', rf'\g<1>{new_version}\g<2>', content)
+        
+        # Write updated content back to __init__.py
+        with open(file_path, 'w') as f:
+            f.write(updated_content)
+    except FileNotFoundError:
+        pass  # Handle file not found error
+
+
 def update_version(new_version):
     # Update descriptor.mod file
     descriptor_mod_path = './descriptor.mod'  # Update with your actual file path
@@ -73,6 +107,10 @@ def update_version(new_version):
     # Update package.json file
     package_json_path = './package.json'  # Update with your actual file path
     update_package_json_version(package_json_path, new_version)
+
+    # Update __init__.py file
+    init_py_path = './__init__.py'  # Update with your actual file path
+    update_init_py_version(init_py_path, new_version)
 
     # Run auto-changelog command
     subprocess.run(['auto-changelog.cmd', '-p'])
