@@ -127,7 +127,7 @@ def update_version(new_version):
     subprocess.run(['git', 'tag', new_version])
 
     # Push the commit and tag to origin
-    subprocess.run(['git', 'push', 'origin', new_version])
+    subprocess.run(['git', 'push', 'origin', 'tag', new_version, '-f'])
 
 if __name__ == '__main__':
     current_version = get_current_version()
